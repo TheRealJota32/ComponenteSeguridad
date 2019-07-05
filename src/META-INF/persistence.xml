@@ -6,6 +6,9 @@
 	<persistence-unit name="componentesUlatina"
 		transaction-type="RESOURCE_LOCAL">
 		<class>edu.ulatina.usuario.Usuario</class>
+		<class>edu.ulatina.lugares.Pais</class>
+		<class>edu.ulatina.lugares.Ciudad</class>
+		<class>edu.ulatina.lugares.LugarTuristico</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url"
 				value="jdbc:mysql://localhost:3306/componentes" />

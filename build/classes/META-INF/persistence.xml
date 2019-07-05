@@ -5,6 +5,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 	<persistence-unit name="componentesUlatina"
 		transaction-type="RESOURCE_LOCAL">
+		<class>edu.ulatina.usuario.Usuario</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url"
 				value="jdbc:mysql://localhost:3306/componentes" />

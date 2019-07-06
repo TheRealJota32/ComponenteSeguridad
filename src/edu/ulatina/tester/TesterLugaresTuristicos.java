@@ -14,34 +14,29 @@ public class TesterLugaresTuristicos {
 
 	public static void main(String[] args) {
 		startEntityManagerFactory();
-		agregarlugares();
+		agregarlugares("Estados Unidos", "New York", "Estatua de la Libertad", "40.6892° N, 74.0445° W");
 		stopEntityManagerFactory();
 
 	}
 
-	public static void agregarlugares() {
+	public static void agregarlugares(String nombrePais, String nombreCiudad, String nombreTuris, String cordenadas) {
 
 		try {
 			Pais pais = new Pais();
-			pais.setNombre("Costa Rica");
+			pais.setNombre(nombrePais);
 			pais.setCiudades(new HashSet<Ciudad>());
 
 			Ciudad ciudad = new Ciudad();
-			ciudad.setNombre("Guanacaste");
+			ciudad.setNombre(nombreCiudad);
 			ciudad.setPais(pais);
 			ciudad.setLugares(new HashSet<LugarTuristico>());
 
-			Ciudad ciudad2 = new Ciudad();
-			ciudad2.setNombre("Limon");
-			ciudad2.setPais(pais);
-
 			LugarTuristico lugarTuristico = new LugarTuristico();
 			lugarTuristico.setCiudad(ciudad);
-			lugarTuristico.setNombre("IDK");
-			lugarTuristico.setGeoCorde("9.7489° N, 83.7534° W");
+			lugarTuristico.setNombre(nombreTuris);
+			lugarTuristico.setGeoCorde(cordenadas);
 
 			pais.getCiudades().add(ciudad);
-			pais.getCiudades().add(ciudad2);
 
 			ciudad.getLugares().add(lugarTuristico);
 
@@ -56,6 +51,39 @@ public class TesterLugaresTuristicos {
 
 		System.out.println("Finalizo");
 
+	}
+
+	public static void borrarLugarTuristico(int id) {
+		LugarTuristico lt = null;
+		try {
+			em.getTransaction().begin();
+			lt = em.find(LugarTuristico.class, id);
+
+			em.remove(lt);
+			em.flush();
+			em.getTransaction().commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("Finalizo");
+	}
+
+	public static void modificarLugarTuristico(int id, String nombre) {
+		LugarTuristico lt = null;
+		try {
+			em.getTransaction().begin();
+			lt = em.find(LugarTuristico.class, id);
+			lt.setNombre(nombre);
+
+			em.persist(lt);
+			em.flush();
+			em.getTransaction().commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("Finalizo");
 	}
 
 	public static void startEntityManagerFactory() {

@@ -1,11 +1,17 @@
 package edu.ulatina.tester;
 
+import java.util.Scanner;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 
+import org.apache.commons.mail.DefaultAuthenticator;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.SimpleEmail;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -16,19 +22,13 @@ import edu.ulatina.usuario.Usuario;
 public class TersterUsuario {
 	private static EntityManagerFactory entityManagerFactory = null;
 	private static EntityManager em = null;
+	private static String codigoEnviado = null;
+	private static String codigoRecibido;
+	private static Scanner in;
 
 	public static void main(String[] args) {
 		startEntityManagerFactory();
-		
-		agregarCliente();
-		
-		System.out.println("Test login 1: Intento de login con nombre de usuario invalido");
-		loginClient("jose321", "hunter2");
-		System.out.println("Test login 2: Intento de login con contraseña invalida");
-		loginClient("jose123", "hunter2");
-		System.out.println("Test login 3: Login valido");
-		loginClient("jose123", "12345");
-		
+
 		stopEntityManagerFactory();
 	}
 
@@ -37,19 +37,19 @@ public class TersterUsuario {
 		try {
 			Usuario item = new Usuario();
 
-			item.setNombre("Jose");
-			item.setApellido("Ramirez");
-			item.setCorreo("jotaramirez.100@gmail.com");
-			item.setUsername("jose123");
-			item.setPassword("12345");
-			item.setRol(1);
+			item.setNombre("Diego");
+			item.setApellido("Alfaro");
+			item.setCorreo("diego@ulatina.net");
+			item.setUsername("diego123");
+			item.setPassword("9876");
+			item.setRol(item.getRol());
 
 			em.getTransaction().begin();
 			em.persist(item);
 			em.flush();
 			em.getTransaction().commit();
 			System.out.println("Finalizo");
-			
+
 		} catch (PersistenceException e) {
 			if (e.getCause() instanceof ConstraintViolationException) {
 				ConstraintViolationException exception = (ConstraintViolationException) e.getCause();
@@ -85,6 +85,62 @@ public class TersterUsuario {
 			System.out.println("El nombre de usuario y contraseña son validos.");
 		} else {
 			System.out.println("¡Contraseña no valida!");
+		}
+	}
+
+	public static void verifyAccount() {
+		in = new Scanner(System.in);
+		String correo = in.nextLine();
+		try {
+			sendEmail(correo);
+			codigoRecibido = in.nextLine();
+			if (codigoRecibido.equals(codigoEnviado)) {
+				modifyStatus(correo);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Finalizo");
+	}
+
+	public static void sendEmail(String correo) {
+		codigoEnviado = Integer.toString((int) (Math.random() * ((9999 - 1010) + 1)));
+
+		try {
+			Email email = new SimpleEmail();
+			email.setHostName("smtp.googlemail.com");
+			email.setSmtpPort(465);
+			email.setAuthenticator(new DefaultAuthenticator("componentesUlatina10@gmail.com", "Componentes10Ulatina"));
+			email.setSSLOnConnect(true);
+			email.setFrom("componentesUlatina10@gmail.com");
+			email.setSubject("Verificar Cuenta");
+			email.setMsg("Su codigo de verificacion es: " + codigoEnviado);
+			email.addTo(correo);
+			email.send();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static void modifyStatus(String correo) {
+		try {
+			String query = "SELECT u FROM Usuario u where u.correo = :userCorreo";
+			TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
+			tq.setParameter("userCorreo", correo);
+			Usuario user = null;
+			user = tq.getSingleResult();
+
+			em.getTransaction().begin();
+			user = em.find(Usuario.class, user.getId());
+			user.setVerificado(true);
+			em.persist(user);
+			em.flush();
+			em.getTransaction().commit();
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

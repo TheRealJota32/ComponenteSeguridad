@@ -20,7 +20,10 @@ public class Usuario implements Serializable {
 	@Column(unique = true)
 	private String username;
 	private String password;
-	private Integer rol;
+	@Column(columnDefinition = "boolean default false", nullable = false)
+	private Boolean rol = false;
+	@Column(columnDefinition = "boolean default false", nullable = false)
+	private Boolean verificado = false;
 
 	private static final long serialVersionUID = 1L;
 
@@ -76,16 +79,24 @@ public class Usuario implements Serializable {
 		this.password = password;
 	}
 
-	public Integer getRol() {
+	public Boolean getRol() {
 		return rol;
 	}
 
-	public void setRol(Integer rol) {
+	public void setRol(Boolean rol) {
 		this.rol = rol;
+	}
+
+	public Boolean getVerificado() {
+		return verificado;
+	}
+
+	public void setVerificado(Boolean verificado) {
+		this.verificado = verificado;
 	}
 
 	public boolean isPasswordValid(String password) {
 		return this.password.equals(password);
 	}
-	
+
 }

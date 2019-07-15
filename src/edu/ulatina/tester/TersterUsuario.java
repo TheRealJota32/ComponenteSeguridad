@@ -22,12 +22,12 @@ public class TersterUsuario {
 		
 		agregarCliente();
 		
-		System.out.println("Test login 1: Intento de login con email invalido");
-		loginClient("example@example.com", "example");
+		System.out.println("Test login 1: Intento de login con nombre de usuario invalido");
+		loginClient("jose321", "hunter2");
 		System.out.println("Test login 2: Intento de login con contraseña invalida");
-		loginClient("jotaramirez.100@gmail.com", "hunter2");
+		loginClient("jose123", "hunter2");
 		System.out.println("Test login 3: Login valido");
-		loginClient("jotaramirez.100@gmail.com", "12345");
+		loginClient("jose123", "12345");
 		
 		stopEntityManagerFactory();
 	}
@@ -67,10 +67,10 @@ public class TersterUsuario {
 		}
 	}
 
-	public static void loginClient(String email, String password) {
+	public static void loginClient(String username, String password) {
 		Session session = em.unwrap(Session.class);
 		Criteria criteria = session.createCriteria(Usuario.class);
-		criteria.add(Restrictions.eq("correo", email));
+		criteria.add(Restrictions.eq("username", username));
 		Usuario usuario = null;
 
 		try {
@@ -80,9 +80,9 @@ public class TersterUsuario {
 		}
 
 		if (usuario == null) {
-			System.out.println("¡Email no registrado!");
+			System.out.println("¡Nombre de usuario no registrado!");
 		} else if (usuario.isPasswordValid(password)) {
-			System.out.println("El email y contraseña son validos.");
+			System.out.println("El nombre de usuario y contraseña son validos.");
 		} else {
 			System.out.println("¡Contraseña no valida!");
 		}

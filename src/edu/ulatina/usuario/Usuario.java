@@ -82,4 +82,8 @@ public class Usuario implements Serializable {
 		this.rol = rol;
 	}
 
+	public boolean isPasswordValid(String password) {
+		return this.password.equals(password);
+	}
+	
 }

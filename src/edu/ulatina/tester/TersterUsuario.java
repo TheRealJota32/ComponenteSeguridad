@@ -104,24 +104,21 @@ public class TersterUsuario {
 		System.out.println("Finalizo");
 	}
 
-	public static void sendEmail(String correo) {
-		codigoEnviado = Integer.toString((int) (Math.random() * ((9999 - 1010) + 1)));
-
+	public static void verifyPass() {
+		in = new Scanner(System.in);
+		String correo = in.nextLine();
 		try {
-			Email email = new SimpleEmail();
-			email.setHostName("smtp.googlemail.com");
-			email.setSmtpPort(465);
-			email.setAuthenticator(new DefaultAuthenticator("componentesUlatina10@gmail.com", "Componentes10Ulatina"));
-			email.setSSLOnConnect(true);
-			email.setFrom("componentesUlatina10@gmail.com");
-			email.setSubject("Verificar Cuenta");
-			email.setMsg("Su codigo de verificacion es: " + codigoEnviado);
-			email.addTo(correo);
-			email.send();
+			sendEmail(correo);
+			codigoRecibido = in.nextLine();
+			if (codigoRecibido.equals(codigoEnviado)) {
+				String pass = in.nextLine();
+				modifyPassword(correo, pass);
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		System.out.println("Finalizo");
 	}
 
 	public static void modifyStatus(String correo) {
@@ -142,6 +139,46 @@ public class TersterUsuario {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void modifyPassword(String correo, String pass) {
+		try {
+			String query = "SELECT u FROM Usuario u where u.correo = :userCorreo";
+			TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
+			tq.setParameter("userCorreo", correo);
+			Usuario user = null;
+			user = tq.getSingleResult();
+
+			em.getTransaction().begin();
+			user = em.find(Usuario.class, user.getId());
+			user.setPassword(pass);
+			em.persist(user);
+			em.flush();
+			em.getTransaction().commit();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void sendEmail(String correo) {
+		codigoEnviado = Integer.toString((int) (Math.random() * ((9999 - 1010) + 1)));
+
+		try {
+			Email email = new SimpleEmail();
+			email.setHostName("smtp.googlemail.com");
+			email.setSmtpPort(465);
+			email.setAuthenticator(new DefaultAuthenticator("componentesUlatina10@gmail.com", "Componentes10Ulatina"));
+			email.setSSLOnConnect(true);
+			email.setFrom("componentesUlatina10@gmail.com");
+			email.setSubject("Verificar Cuenta");
+			email.setMsg("Su codigo de verificacion es: " + codigoEnviado);
+			email.addTo(correo);
+			email.send();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public static void startEntityManagerFactory() {

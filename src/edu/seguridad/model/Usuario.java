@@ -1,6 +1,8 @@
-package edu.ulatina.usuario;
+package edu.seguridad.model;
 
 import java.io.Serializable;
+import java.util.Set;
+
 import javax.persistence.*;
 
 /**
@@ -12,7 +14,7 @@ public class Usuario implements Serializable {
 
 	@Id
 	@GeneratedValue
-	private Integer id;
+	private Integer idUsuario;
 	private String nombre;
 	private String apellido;
 	@Column(unique = true)
@@ -21,9 +23,13 @@ public class Usuario implements Serializable {
 	private String username;
 	private String password;
 	@Column(columnDefinition = "boolean default false", nullable = false)
-	private Boolean rol = false;
-	@Column(columnDefinition = "boolean default false", nullable = false)
 	private Boolean verificado = false;
+
+	// many to many relationship between user and app
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "usuario_por_app", joinColumns = { @JoinColumn(name = "idUsuario") }, inverseJoinColumns = {
+			@JoinColumn(name = "idApp") })
+	private Set<Aplicacion> aplicaciones;
 
 	private static final long serialVersionUID = 1L;
 
@@ -31,12 +37,12 @@ public class Usuario implements Serializable {
 		super();
 	}
 
-	public Integer getId() {
-		return id;
+	public Integer getIdUsuario() {
+		return idUsuario;
 	}
 
-	public void setId(Integer id) {
-		this.id = id;
+	public void setIdUsuario(Integer idUsuario) {
+		this.idUsuario = idUsuario;
 	}
 
 	public String getNombre() {
@@ -79,14 +85,6 @@ public class Usuario implements Serializable {
 		this.password = password;
 	}
 
-	public Boolean getRol() {
-		return rol;
-	}
-
-	public void setRol(Boolean rol) {
-		this.rol = rol;
-	}
-
 	public Boolean getVerificado() {
 		return verificado;
 	}
@@ -97,6 +95,14 @@ public class Usuario implements Serializable {
 
 	public boolean isPasswordValid(String password) {
 		return this.password.equals(password);
+	}
+
+	public Set<Aplicacion> getAplicaciones() {
+		return aplicaciones;
+	}
+
+	public void setAplicaciones(Set<Aplicacion> aplicaciones) {
+		this.aplicaciones = aplicaciones;
 	}
 
 }

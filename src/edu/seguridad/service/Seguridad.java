@@ -1,6 +1,4 @@
-package edu.ulatina.tester;
-
-import java.util.Scanner;
+package edu.seguridad.service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -17,32 +15,24 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
-import edu.ulatina.usuario.Usuario;
+import edu.seguridad.model.Usuario;
 
-public class TersterUsuario {
+public class Seguridad {
 	private static EntityManagerFactory entityManagerFactory = null;
 	private static EntityManager em = null;
 	private static String codigoEnviado = null;
 	private static String codigoRecibido;
-	private static Scanner in;
 
-	public static void main(String[] args) {
-		startEntityManagerFactory();
-
-		stopEntityManagerFactory();
-	}
-
-	public static void agregarCliente() {
+	public static void signUp(String nombre, String apellido, String correo, String username, String pass) {
 
 		try {
 			Usuario item = new Usuario();
 
-			item.setNombre("Diego");
-			item.setApellido("Alfaro");
-			item.setCorreo("diego@ulatina.net");
-			item.setUsername("diego123");
-			item.setPassword("9876");
-			item.setRol(item.getRol());
+			item.setNombre(nombre);
+			item.setApellido(apellido);
+			item.setCorreo(correo);
+			item.setUsername(username);
+			item.setPassword(pass);
 
 			em.getTransaction().begin();
 			em.persist(item);
@@ -88,12 +78,10 @@ public class TersterUsuario {
 		}
 	}
 
-	public static void verifyAccount() {
-		in = new Scanner(System.in);
-		String correo = in.nextLine();
+	public static void verifyAccount(String correo) {
 		try {
 			sendEmail(correo);
-			codigoRecibido = in.nextLine();
+			codigoRecibido = codigoEnviado;
 			if (codigoRecibido.equals(codigoEnviado)) {
 				modifyStatus(correo);
 			}
@@ -104,14 +92,12 @@ public class TersterUsuario {
 		System.out.println("Finalizo");
 	}
 
-	public static void verifyPass() {
-		in = new Scanner(System.in);
-		String correo = in.nextLine();
+	public static void verifyPass(String correo) {
 		try {
 			sendEmail(correo);
-			codigoRecibido = in.nextLine();
+			codigoRecibido = codigoEnviado;
 			if (codigoRecibido.equals(codigoEnviado)) {
-				String pass = in.nextLine();
+				String pass = "Test";
 				modifyPassword(correo, pass);
 			}
 
@@ -130,7 +116,7 @@ public class TersterUsuario {
 			user = tq.getSingleResult();
 
 			em.getTransaction().begin();
-			user = em.find(Usuario.class, user.getId());
+			user = em.find(Usuario.class, user.getIdUsuario());
 			user.setVerificado(true);
 			em.persist(user);
 			em.flush();
@@ -150,7 +136,7 @@ public class TersterUsuario {
 			user = tq.getSingleResult();
 
 			em.getTransaction().begin();
-			user = em.find(Usuario.class, user.getId());
+			user = em.find(Usuario.class, user.getIdUsuario());
 			user.setPassword(pass);
 			em.persist(user);
 			em.flush();

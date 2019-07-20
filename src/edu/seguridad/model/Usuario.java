@@ -31,6 +31,11 @@ public class Usuario implements Serializable {
 			@JoinColumn(name = "idApp") })
 	private Set<Aplicacion> aplicaciones;
 
+	// one to one relationship between usuario and rol
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "idRol")
+	private Rol rol;
+
 	private static final long serialVersionUID = 1L;
 
 	public Usuario() {
@@ -103,6 +108,14 @@ public class Usuario implements Serializable {
 
 	public void setAplicaciones(Set<Aplicacion> aplicaciones) {
 		this.aplicaciones = aplicaciones;
+	}
+
+	public Rol getRol() {
+		return rol;
+	}
+
+	public void setRol(Rol rol) {
+		this.rol = rol;
 	}
 
 }

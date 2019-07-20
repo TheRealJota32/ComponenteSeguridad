@@ -17,17 +17,21 @@ public class Rol implements Serializable {
 	@GeneratedValue
 	private Integer idRol;
 	private String nombre;
-	
+
 	// many to one relationship between app and rol
 	@ManyToOne
 	@JoinColumn(name = "idApp")
 	private Aplicacion app;
-	
+
 	// many to many relationship between rol and modulo
 	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "rol_por_modulo", joinColumns = { @JoinColumn(name = "idRol") }, inverseJoinColumns = {
 			@JoinColumn(name = "idMod") })
 	private Set<Modulo> modulos;
+
+	// one to one relationship between usuario and rol
+	@OneToOne(mappedBy = "rol")
+	private Usuario usuario;
 
 	private static final long serialVersionUID = 1L;
 
@@ -65,6 +69,14 @@ public class Rol implements Serializable {
 
 	public void setModulos(Set<Modulo> modulos) {
 		this.modulos = modulos;
+	}
+
+	public Usuario getUsuario() {
+		return usuario;
+	}
+
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
 	}
 
 }

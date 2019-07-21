@@ -1,9 +1,6 @@
 package edu.seguridad.service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.NonUniqueResultException;
-import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.TypedQuery;
 
@@ -15,29 +12,35 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
+import edu.seguridad.model.Rol;
 import edu.seguridad.model.Usuario;
 
-public class Seguridad {
-	private static EntityManagerFactory entityManagerFactory = null;
-	private static EntityManager em = null;
+public class SeguridadUsuario {
+
+	private static Conector conectorHibernate = new Conector();
 	private static String codigoEnviado = null;
 	private static String codigoRecibido;
 
-	public static void signUp(String nombre, String apellido, String correo, String username, String pass) {
+	public void signUp(String nombre, String apellido, String correo, String username, String pass) {
 
 		try {
-			Usuario item = new Usuario();
+			conectorHibernate.startEntityManagerFactory();
+			Rol rol = new Rol();
+			rol = conectorHibernate.getEm().find(Rol.class, 2);
 
+			Usuario item = new Usuario();
 			item.setNombre(nombre);
 			item.setApellido(apellido);
 			item.setCorreo(correo);
 			item.setUsername(username);
 			item.setPassword(pass);
+			item.setRol(rol);
 
-			em.getTransaction().begin();
-			em.persist(item);
-			em.flush();
-			em.getTransaction().commit();
+			conectorHibernate.getEm().getTransaction().begin();
+			conectorHibernate.getEm().merge(item);
+			conectorHibernate.getEm().getTransaction().commit();
+
+			conectorHibernate.stopEntityManagerFactory();
 			System.out.println("Finalizo");
 
 		} catch (PersistenceException e) {
@@ -53,18 +56,19 @@ public class Seguridad {
 			} else {
 				e.printStackTrace();
 			}
-			em.getTransaction().rollback();
+			conectorHibernate.getEm().getTransaction().rollback();
 		}
 	}
 
-	public static void loginClient(String username, String password) {
-		Session session = em.unwrap(Session.class);
-		Criteria criteria = session.createCriteria(Usuario.class);
-		criteria.add(Restrictions.eq("username", username));
+	public void loginClient(String username, String password) {
 		Usuario usuario = null;
-
 		try {
+			conectorHibernate.startEntityManagerFactory();
+			Session session = conectorHibernate.getEm().unwrap(Session.class);
+			Criteria criteria = session.createCriteria(Usuario.class);
+			criteria.add(Restrictions.eq("username", username));
 			usuario = (Usuario) criteria.uniqueResult();
+			conectorHibernate.stopEntityManagerFactory();
 		} catch (NonUniqueResultException e) {
 			e.printStackTrace();
 		}
@@ -72,82 +76,91 @@ public class Seguridad {
 		if (usuario == null) {
 			System.out.println("¡Nombre de usuario no registrado!");
 		} else if (usuario.isPasswordValid(password)) {
-			System.out.println("El nombre de usuario y contraseña son validos.");
+			System.out.println("Bienvenido al Sistema");
 		} else {
 			System.out.println("¡Contraseña no valida!");
 		}
 	}
 
-	public static void verifyAccount(String correo) {
+	public void verifyAccount(String correo) {
 		try {
+			conectorHibernate.startEntityManagerFactory();
 			sendEmail(correo);
 			codigoRecibido = codigoEnviado;
 			if (codigoRecibido.equals(codigoEnviado)) {
 				modifyStatus(correo);
 			}
-
+			conectorHibernate.stopEntityManagerFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		System.out.println("Finalizo");
+
+		codigoEnviado = null;
+		codigoRecibido = null;
 	}
 
-	public static void verifyPass(String correo) {
+	public void verifyPass(String correo, String pass) {
 		try {
+			conectorHibernate.startEntityManagerFactory();
 			sendEmail(correo);
 			codigoRecibido = codigoEnviado;
 			if (codigoRecibido.equals(codigoEnviado)) {
-				String pass = "Test";
 				modifyPassword(correo, pass);
 			}
-
+			conectorHibernate.stopEntityManagerFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		System.out.println("Finalizo");
+		codigoEnviado = null;
+		codigoRecibido = null;
 	}
 
-	public static void modifyStatus(String correo) {
+	public void modifyStatus(String correo) {
 		try {
+			conectorHibernate.startEntityManagerFactory();
 			String query = "SELECT u FROM Usuario u where u.correo = :userCorreo";
-			TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
+			TypedQuery<Usuario> tq = conectorHibernate.getEm().createQuery(query, Usuario.class);
 			tq.setParameter("userCorreo", correo);
 			Usuario user = null;
 			user = tq.getSingleResult();
 
-			em.getTransaction().begin();
-			user = em.find(Usuario.class, user.getIdUsuario());
+			conectorHibernate.getEm().getTransaction().begin();
+			user = conectorHibernate.getEm().find(Usuario.class, user.getIdUsuario());
 			user.setVerificado(true);
-			em.persist(user);
-			em.flush();
-			em.getTransaction().commit();
+			conectorHibernate.getEm().persist(user);
+			conectorHibernate.getEm().flush();
+			conectorHibernate.getEm().getTransaction().commit();
 
+			conectorHibernate.stopEntityManagerFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void modifyPassword(String correo, String pass) {
+	public void modifyPassword(String correo, String pass) {
 		try {
+			conectorHibernate.startEntityManagerFactory();
 			String query = "SELECT u FROM Usuario u where u.correo = :userCorreo";
-			TypedQuery<Usuario> tq = em.createQuery(query, Usuario.class);
+			TypedQuery<Usuario> tq = conectorHibernate.getEm().createQuery(query, Usuario.class);
 			tq.setParameter("userCorreo", correo);
 			Usuario user = null;
 			user = tq.getSingleResult();
 
-			em.getTransaction().begin();
-			user = em.find(Usuario.class, user.getIdUsuario());
+			conectorHibernate.getEm().getTransaction().begin();
+			user = conectorHibernate.getEm().find(Usuario.class, user.getIdUsuario());
 			user.setPassword(pass);
-			em.persist(user);
-			em.flush();
-			em.getTransaction().commit();
-
+			conectorHibernate.getEm().persist(user);
+			conectorHibernate.getEm().flush();
+			conectorHibernate.getEm().getTransaction().commit();
+			conectorHibernate.stopEntityManagerFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void sendEmail(String correo) {
+	public void sendEmail(String correo) {
 		codigoEnviado = Integer.toString((int) (Math.random() * ((9999 - 1010) + 1)));
 
 		try {
@@ -167,28 +180,4 @@ public class Seguridad {
 
 	}
 
-	public static void startEntityManagerFactory() {
-		if (entityManagerFactory == null) {
-			try {
-				entityManagerFactory = Persistence.createEntityManagerFactory("componentesUlatina");
-				em = entityManagerFactory.createEntityManager();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public static void stopEntityManagerFactory() {
-		if (entityManagerFactory != null) {
-			if (entityManagerFactory.isOpen()) {
-				try {
-					entityManagerFactory.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			em.close();
-			entityManagerFactory = null;
-		}
-	}
 }

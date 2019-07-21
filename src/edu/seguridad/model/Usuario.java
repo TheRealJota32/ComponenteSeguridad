@@ -33,7 +33,7 @@ public class Usuario implements Serializable {
 
 	// one to one relationship between usuario and rol
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "idRol")
+	@JoinColumn(name = "idRol", nullable = false)
 	private Rol rol;
 
 	private static final long serialVersionUID = 1L;

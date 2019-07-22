@@ -24,7 +24,7 @@ public class Rol implements Serializable {
 	private Aplicacion app;
 
 	// many to many relationship between rol and modulo
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "rol_por_modulo", joinColumns = { @JoinColumn(name = "idRol") }, inverseJoinColumns = {
 			@JoinColumn(name = "idMod") })
 	private Set<Modulo> modulos;

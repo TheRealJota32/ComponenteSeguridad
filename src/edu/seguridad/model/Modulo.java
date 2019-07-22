@@ -23,7 +23,7 @@ public class Modulo implements Serializable {
 	private Set<Rol> roles;
 
 	// one to many relationship between modulo and funcionalidad
-	@OneToMany(mappedBy = "mod", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "mod", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Set<Funcionalidad> funcionalidades;
 
 	private static final long serialVersionUID = 1L;

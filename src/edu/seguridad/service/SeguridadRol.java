@@ -1,23 +1,73 @@
 package edu.seguridad.service;
 
+import java.util.HashSet;
 import java.util.List;
 
+import edu.seguridad.model.Modulo;
 import edu.seguridad.model.Rol;
 
 public class SeguridadRol {
-	private static Conector conectorHibernate = new Conector();
+	private static Conector ch = new Conector();
+
+	public void addRolForModulo(int idRol, String nombre) {
+		try {
+			ch.startEntityManagerFactory();
+
+			Rol rol = new Rol();
+			rol.setModulos(new HashSet<Modulo>());
+			rol = ch.getEm().find(Rol.class, idRol);
+
+			Modulo mod = new Modulo();
+			mod.setNombre(nombre);
+
+			rol.getModulos().add(mod);
+
+			ch.getEm().getTransaction().begin();
+			ch.getEm().merge(rol);
+			ch.getEm().getTransaction().commit();
+
+			ch.stopEntityManagerFactory();
+			System.out.println("Finalizo");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void addOldRol(int idRol, int idMod) {
+		try {
+			ch.startEntityManagerFactory();
+
+			Rol rol = new Rol();
+			rol = ch.getEm().find(Rol.class, idRol);
+
+			Modulo mod = new Modulo();
+			mod = ch.getEm().find(Modulo.class, idMod);
+
+			rol.getModulos().add(mod);
+
+			ch.getEm().getTransaction().begin();
+			ch.getEm().merge(rol);
+			ch.getEm().getTransaction().commit();
+
+			ch.stopEntityManagerFactory();
+			System.out.println("Finalizo");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public List<Rol> getRol() {
 		List<Rol> roles = null;
 		try {
-			conectorHibernate.startEntityManagerFactory();
+			ch.startEntityManagerFactory();
 			String query = "SELECT r FROM Rol r";
-			roles = conectorHibernate.getEm().createQuery(query, Rol.class).getResultList();
+			roles = ch.getEm().createQuery(query, Rol.class).getResultList();
 
 			if (roles == null) {
 				System.out.println("No se encontro ningun rol");
 			}
-			conectorHibernate.stopEntityManagerFactory();
+			ch.stopEntityManagerFactory();
 		} catch (Exception e) {
 
 		}
@@ -27,15 +77,16 @@ public class SeguridadRol {
 	public void updateRol(int id, String nombre) {
 		Rol item = null;
 		try {
-			conectorHibernate.startEntityManagerFactory();
-			conectorHibernate.getEm().getTransaction().begin();
-			item = conectorHibernate.getEm().find(Rol.class, id);
+			ch.startEntityManagerFactory();
+			ch.getEm().getTransaction().begin();
+			item = ch.getEm().find(Rol.class, id);
 			item.setNombre(nombre);
-			conectorHibernate.getEm().persist(item);
-			conectorHibernate.getEm().flush();
-			conectorHibernate.getEm().getTransaction().commit();
+			ch.getEm().persist(item);
+			ch.getEm().flush();
+			ch.getEm().getTransaction().commit();
 
-			conectorHibernate.stopEntityManagerFactory();
+			ch.stopEntityManagerFactory();
+			System.out.println("Finalizo");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -44,14 +95,15 @@ public class SeguridadRol {
 	public void removeRol(int id) {
 		Rol item = null;
 		try {
-			conectorHibernate.startEntityManagerFactory();
-			conectorHibernate.getEm().getTransaction().begin();
-			item = conectorHibernate.getEm().find(Rol.class, id);
-			conectorHibernate.getEm().remove(item);
-			conectorHibernate.getEm().flush();
-			conectorHibernate.getEm().getTransaction().commit();
+			ch.startEntityManagerFactory();
+			ch.getEm().getTransaction().begin();
+			item = ch.getEm().find(Rol.class, id);
+			ch.getEm().remove(item);
+			ch.getEm().flush();
+			ch.getEm().getTransaction().commit();
 
-			conectorHibernate.stopEntityManagerFactory();
+			ch.stopEntityManagerFactory();
+			System.out.println("Finalizo");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

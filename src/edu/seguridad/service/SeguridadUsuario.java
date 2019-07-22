@@ -12,21 +12,22 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.ConstraintViolationException;
 
+import edu.seguridad.model.Aplicacion;
 import edu.seguridad.model.Rol;
 import edu.seguridad.model.Usuario;
 
 public class SeguridadUsuario {
 
-	private static Conector conectorHibernate = new Conector();
+	private static Conector ch = new Conector();
 	private static String codigoEnviado = null;
 	private static String codigoRecibido;
 
 	public void signUp(String nombre, String apellido, String correo, String username, String pass) {
 
 		try {
-			conectorHibernate.startEntityManagerFactory();
+			ch.startEntityManagerFactory();
 			Rol rol = new Rol();
-			rol = conectorHibernate.getEm().find(Rol.class, 2);
+			rol = ch.getEm().find(Rol.class, 2);
 
 			Usuario item = new Usuario();
 			item.setNombre(nombre);
@@ -36,11 +37,11 @@ public class SeguridadUsuario {
 			item.setPassword(pass);
 			item.setRol(rol);
 
-			conectorHibernate.getEm().getTransaction().begin();
-			conectorHibernate.getEm().merge(item);
-			conectorHibernate.getEm().getTransaction().commit();
+			ch.getEm().getTransaction().begin();
+			ch.getEm().merge(item);
+			ch.getEm().getTransaction().commit();
 
-			conectorHibernate.stopEntityManagerFactory();
+			ch.stopEntityManagerFactory();
 			System.out.println("Finalizo");
 
 		} catch (PersistenceException e) {
@@ -56,19 +57,19 @@ public class SeguridadUsuario {
 			} else {
 				e.printStackTrace();
 			}
-			conectorHibernate.getEm().getTransaction().rollback();
+			ch.getEm().getTransaction().rollback();
 		}
 	}
 
 	public void loginClient(String username, String password) {
 		Usuario usuario = null;
 		try {
-			conectorHibernate.startEntityManagerFactory();
-			Session session = conectorHibernate.getEm().unwrap(Session.class);
+			ch.startEntityManagerFactory();
+			Session session = ch.getEm().unwrap(Session.class);
 			Criteria criteria = session.createCriteria(Usuario.class);
 			criteria.add(Restrictions.eq("username", username));
 			usuario = (Usuario) criteria.uniqueResult();
-			conectorHibernate.stopEntityManagerFactory();
+			ch.stopEntityManagerFactory();
 		} catch (NonUniqueResultException e) {
 			e.printStackTrace();
 		}
@@ -82,15 +83,15 @@ public class SeguridadUsuario {
 		}
 	}
 
-	public void verifyAccount(String correo) {
+	public void verifyAccount(String correo, String codRec) {
 		try {
-			conectorHibernate.startEntityManagerFactory();
+			ch.startEntityManagerFactory();
 			sendEmail(correo);
-			codigoRecibido = codigoEnviado;
+			codigoRecibido = codRec;
 			if (codigoRecibido.equals(codigoEnviado)) {
 				modifyStatus(correo);
 			}
-			conectorHibernate.stopEntityManagerFactory();
+			ch.stopEntityManagerFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -100,15 +101,15 @@ public class SeguridadUsuario {
 		codigoRecibido = null;
 	}
 
-	public void verifyPass(String correo, String pass) {
+	public void verifyPass(String correo, String codRec, String pass) {
 		try {
-			conectorHibernate.startEntityManagerFactory();
+			ch.startEntityManagerFactory();
 			sendEmail(correo);
-			codigoRecibido = codigoEnviado;
+			codigoRecibido = codRec;
 			if (codigoRecibido.equals(codigoEnviado)) {
 				modifyPassword(correo, pass);
 			}
-			conectorHibernate.stopEntityManagerFactory();
+			ch.stopEntityManagerFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -119,21 +120,21 @@ public class SeguridadUsuario {
 
 	public void modifyStatus(String correo) {
 		try {
-			conectorHibernate.startEntityManagerFactory();
+			ch.startEntityManagerFactory();
 			String query = "SELECT u FROM Usuario u where u.correo = :userCorreo";
-			TypedQuery<Usuario> tq = conectorHibernate.getEm().createQuery(query, Usuario.class);
+			TypedQuery<Usuario> tq = ch.getEm().createQuery(query, Usuario.class);
 			tq.setParameter("userCorreo", correo);
 			Usuario user = null;
 			user = tq.getSingleResult();
 
-			conectorHibernate.getEm().getTransaction().begin();
-			user = conectorHibernate.getEm().find(Usuario.class, user.getIdUsuario());
+			ch.getEm().getTransaction().begin();
+			user = ch.getEm().find(Usuario.class, user.getIdUsuario());
 			user.setVerificado(true);
-			conectorHibernate.getEm().persist(user);
-			conectorHibernate.getEm().flush();
-			conectorHibernate.getEm().getTransaction().commit();
+			ch.getEm().persist(user);
+			ch.getEm().flush();
+			ch.getEm().getTransaction().commit();
 
-			conectorHibernate.stopEntityManagerFactory();
+			ch.stopEntityManagerFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -141,20 +142,20 @@ public class SeguridadUsuario {
 
 	public void modifyPassword(String correo, String pass) {
 		try {
-			conectorHibernate.startEntityManagerFactory();
+			ch.startEntityManagerFactory();
 			String query = "SELECT u FROM Usuario u where u.correo = :userCorreo";
-			TypedQuery<Usuario> tq = conectorHibernate.getEm().createQuery(query, Usuario.class);
+			TypedQuery<Usuario> tq = ch.getEm().createQuery(query, Usuario.class);
 			tq.setParameter("userCorreo", correo);
 			Usuario user = null;
 			user = tq.getSingleResult();
 
-			conectorHibernate.getEm().getTransaction().begin();
-			user = conectorHibernate.getEm().find(Usuario.class, user.getIdUsuario());
+			ch.getEm().getTransaction().begin();
+			user = ch.getEm().find(Usuario.class, user.getIdUsuario());
 			user.setPassword(pass);
-			conectorHibernate.getEm().persist(user);
-			conectorHibernate.getEm().flush();
-			conectorHibernate.getEm().getTransaction().commit();
-			conectorHibernate.stopEntityManagerFactory();
+			ch.getEm().persist(user);
+			ch.getEm().flush();
+			ch.getEm().getTransaction().commit();
+			ch.stopEntityManagerFactory();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -178,6 +179,28 @@ public class SeguridadUsuario {
 			e.printStackTrace();
 		}
 
+	}
+
+	public void addAppForClient(int idUser, int idApp) {
+		try {
+			ch.startEntityManagerFactory();
+			Usuario user = new Usuario();
+			user = ch.getEm().find(Usuario.class, idUser);
+
+			Aplicacion app = new Aplicacion();
+			app = ch.getEm().find(Aplicacion.class, idApp);
+
+			user.getAplicaciones().add(app);
+
+			ch.getEm().getTransaction().begin();
+			ch.getEm().merge(user);
+			ch.getEm().getTransaction().commit();
+
+			ch.stopEntityManagerFactory();
+			System.out.println("Finalizo");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }

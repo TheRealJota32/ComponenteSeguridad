@@ -6,11 +6,11 @@ import edu.seguridad.model.Aplicacion;
 import edu.seguridad.model.Rol;
 
 public class SeguridadAppRol {
-	private static Conector conectorHibernate = new Conector();
+	private static Conector ch = new Conector();
 
 	public void addAppRol(String appParam, String rolParam) {
 		try {
-			conectorHibernate.startEntityManagerFactory();
+			ch.startEntityManagerFactory();
 			Aplicacion app = new Aplicacion();
 			app.setNombre(appParam);
 			app.setRoles(new HashSet<Rol>());
@@ -21,11 +21,11 @@ public class SeguridadAppRol {
 
 			app.getRoles().add(rol);
 
-			conectorHibernate.getEm().getTransaction().begin();
-			conectorHibernate.getEm().persist(app);
-			conectorHibernate.getEm().getTransaction().commit();
+			ch.getEm().getTransaction().begin();
+			ch.getEm().persist(app);
+			ch.getEm().getTransaction().commit();
 
-			conectorHibernate.stopEntityManagerFactory();
+			ch.stopEntityManagerFactory();
 			System.out.println("Finalizo");
 
 		} catch (Exception e) {
@@ -35,9 +35,9 @@ public class SeguridadAppRol {
 
 	public void addRol(String rolParam) {
 		try {
-			conectorHibernate.startEntityManagerFactory();
+			ch.startEntityManagerFactory();
 			Aplicacion app = new Aplicacion();
-			app = conectorHibernate.getEm().find(Aplicacion.class, 1);
+			app = ch.getEm().find(Aplicacion.class, 1);
 
 			Rol rol = new Rol();
 			rol.setNombre(rolParam);
@@ -45,11 +45,11 @@ public class SeguridadAppRol {
 
 			app.getRoles().add(rol);
 
-			conectorHibernate.getEm().getTransaction().begin();
-			conectorHibernate.getEm().merge(app);
-			conectorHibernate.getEm().getTransaction().commit();
+			ch.getEm().getTransaction().begin();
+			ch.getEm().merge(app);
+			ch.getEm().getTransaction().commit();
 
-			conectorHibernate.stopEntityManagerFactory();
+			ch.stopEntityManagerFactory();
 			System.out.println("Finalizo");
 
 		} catch (Exception e) {

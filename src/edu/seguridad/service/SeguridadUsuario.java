@@ -22,7 +22,7 @@ public class SeguridadUsuario {
 	private static String codigoEnviado = null;
 	private static String codigoRecibido;
 
-	public void signUp(String nombre, String apellido, String correo, String username, String pass) {
+	public Usuario signUp(String nombre, String apellido, String correo, String username, String pass) {
 
 		try {
 			ch.startEntityManagerFactory();
@@ -43,6 +43,8 @@ public class SeguridadUsuario {
 
 			ch.stopEntityManagerFactory();
 			System.out.println("Finalizo");
+			
+			return item;
 
 		} catch (PersistenceException e) {
 			if (e.getCause() instanceof ConstraintViolationException) {
@@ -58,7 +60,9 @@ public class SeguridadUsuario {
 				e.printStackTrace();
 			}
 			ch.getEm().getTransaction().rollback();
+			return null;
 		}
+		
 	}
 
 	public Usuario loginClient(String username, String password) {

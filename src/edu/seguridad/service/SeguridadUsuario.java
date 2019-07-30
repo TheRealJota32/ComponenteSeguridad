@@ -61,7 +61,7 @@ public class SeguridadUsuario {
 		}
 	}
 
-	public void loginClient(String username, String password) {
+	public Usuario loginClient(String username, String password) {
 		Usuario usuario = null;
 		try {
 			ch.startEntityManagerFactory();
@@ -77,10 +77,12 @@ public class SeguridadUsuario {
 		if (usuario == null) {
 			System.out.println("¡Nombre de usuario no registrado!");
 		} else if (usuario.isPasswordValid(password)) {
-			System.out.println("Bienvenido al Sistema");
+			System.out.println("Bienvenido al Sistema " + usuario.getUsername());
 		} else {
 			System.out.println("¡Contraseña no valida!");
 		}
+		
+		return usuario;
 	}
 
 	public void verifyAccount(String correo, String codRec) {

@@ -1,5 +1,9 @@
 package edu.seguridad.service;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.TypedQuery;
@@ -21,15 +25,33 @@ public class SeguridadUsuario {
 	private static Conector ch = new Conector();
 	private static String codigoEnviado = null;
 	private static String codigoRecibido;
+	
+	
+	public List<Usuario> users(){
+		List<Usuario> usuarios = new ArrayList<>();
+		
+		try {
+			ch.startEntityManagerFactory();
+			String query = "SELECT u FROM Usuario u";
+			TypedQuery<Usuario> tq = ch.getEm().createQuery(query, Usuario.class);
+			usuarios = tq.getResultList();
+			ch.stopEntityManagerFactory();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return usuarios.isEmpty() ? null: usuarios;
+	}
 
 	public Usuario signUp(String nombre, String apellido, String correo, String username, String pass) {
+		Usuario item = null;
 
 		try {
 			ch.startEntityManagerFactory();
 			Rol rol = new Rol();
 			rol = ch.getEm().find(Rol.class, 2);
 
-			Usuario item = new Usuario();
+			item = new Usuario();
 			item.setNombre(nombre);
 			item.setApellido(apellido);
 			item.setCorreo(correo);
@@ -39,12 +61,13 @@ public class SeguridadUsuario {
 
 			ch.getEm().getTransaction().begin();
 			ch.getEm().merge(item);
+			ch.getEm().flush();
 			ch.getEm().getTransaction().commit();
+			
 
 			ch.stopEntityManagerFactory();
+			System.out.println(item.getNombre());
 			System.out.println("Finalizo");
-			
-			return item;
 
 		} catch (PersistenceException e) {
 			if (e.getCause() instanceof ConstraintViolationException) {
@@ -60,9 +83,9 @@ public class SeguridadUsuario {
 				e.printStackTrace();
 			}
 			ch.getEm().getTransaction().rollback();
-			return null;
 		}
-		
+
+		return item;
 	}
 
 	public Usuario loginClient(String username, String password) {
@@ -85,14 +108,13 @@ public class SeguridadUsuario {
 		} else {
 			System.out.println("¡Contraseña no valida!");
 		}
-		
+
 		return usuario;
 	}
 
 	public void verifyAccount(String correo, String codRec) {
 		try {
 			ch.startEntityManagerFactory();
-			sendEmail(correo);
 			codigoRecibido = codRec;
 			if (codigoRecibido.equals(codigoEnviado)) {
 				modifyStatus(correo);
@@ -110,7 +132,6 @@ public class SeguridadUsuario {
 	public void verifyPass(String correo, String codRec, String pass) {
 		try {
 			ch.startEntityManagerFactory();
-			sendEmail(correo);
 			codigoRecibido = codRec;
 			if (codigoRecibido.equals(codigoEnviado)) {
 				modifyPassword(correo, pass);
@@ -207,6 +228,34 @@ public class SeguridadUsuario {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void updateRol(int idUsuario, String rol) {
+		Usuario u = null;
+		Rol r = null;
+		
+		try {
+			ch.startEntityManagerFactory();
+			ch.getEm().getTransaction().begin();
+			u = ch.getEm().find(Usuario.class, idUsuario);
+			
+			String query = "SELECT r FROM Rol r where r.nombre = :rol";
+			TypedQuery<Rol> tq = ch.getEm().createQuery(query, Rol.class);
+			tq.setParameter("rol", rol);
+			r = tq.getSingleResult();
+			
+			u.setRol(r);
+
+			ch.getEm().persist(u);
+			ch.getEm().flush();
+			ch.getEm().getTransaction().commit();
+
+			ch.stopEntityManagerFactory();
+			System.out.println("Finalizo");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 }

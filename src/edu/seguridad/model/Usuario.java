@@ -13,7 +13,7 @@ import javax.persistence.*;
 public class Usuario implements Serializable {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer idUsuario;
 	private String nombre;
 	private String apellido;
@@ -26,7 +26,7 @@ public class Usuario implements Serializable {
 	private Boolean verificado = false;
 
 	// many to many relationship between user and app
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "usuario_por_app", joinColumns = { @JoinColumn(name = "idUsuario") }, inverseJoinColumns = {
 			@JoinColumn(name = "idApp") })
 	private Set<Aplicacion> aplicaciones;
